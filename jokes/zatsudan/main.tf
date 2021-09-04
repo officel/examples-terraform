@@ -1,19 +1,22 @@
-locals {
-  selection = [
-    "た:旅",
-    "の:乗り物",
-    "し:仕事、趣味",
-    "く:国(故郷）",
-    "は:はやり",
-    "な:長生き、健康",
-    "す:スポーツ",
-    "こ:子供",
-    "つ:通信（ニュース・社会問題等）",
+variable "selection" {
+  description = "tWhat shall we talk about?"
+
+  type    = list(string)
+  default = [
+    "favorite music ?",
+    "favorite AWS service is ?",
+    "dog or cat ?",
   ]
+
+  validation {
+    condition     = length(var.selection) > 2
+    error_message = "It needs to be a random value, so make it more than one list."
+  }
+
 }
 
 resource "random_shuffle" "selector" {
-  input        = local.selection
+  input        = var.selection
   result_count = 1
 }
 
