@@ -1,2 +1,6 @@
-# examples-terraform
-Example usage of HashiCorp Terraform. How to, Learn, and more. It's a personal snippets.
+# about
+
+There are already many repositories for each cloud and provider of terraform.
+I decided to make this repository a collection of code snippets.
+This is a challenge to be updated weekly.
+
