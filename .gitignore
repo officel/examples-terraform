@@ -31,3 +31,6 @@ override.tf.json
 # no need lock file on this repo
 .terraform.lock.hcl
 
+# no need .auto.tfvars on this repo because use only test for local
+*.auto.tfvars
+
