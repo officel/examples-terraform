@@ -1,7 +1,6 @@
 variable "selection" {
-  description = "tWhat shall we talk about?"
-
-  type    = list(string)
+  description = "What shall we talk about?"
+  type        = list(string)
   default = [
     "favorite music ?",
     "favorite AWS service is ?",
@@ -12,7 +11,6 @@ variable "selection" {
     condition     = length(var.selection) > 2
     error_message = "It needs to be a random value, so make it more than one list."
   }
-
 }
 
 resource "random_shuffle" "selector" {
