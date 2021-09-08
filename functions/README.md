@@ -18,5 +18,5 @@ That's all.
 - see abs.tf
 - `terraform output abs`
 - `terraform output abs_free`
-- no need abs_free ? create file abs.auto.tfvars. iside `abs_free = []`
+- no need abs_free ? create file abs.auto.tfvars. inside `abs_free = []`
 
