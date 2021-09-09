@@ -8,6 +8,7 @@ on:
     paths:
     - ".github/workflows/pr_jokes_zatsudan.yml"
     - "jokes/zatsudan/*.tf"
+    - "jokes/zatsudan2/*.tf"
     type:
     - opened
     - synchronize
@@ -22,6 +23,7 @@ jobs:
       matrix:
         dir:
         - "jokes/zatsudan"
+        - "jokes/zatsudan2"
 
     defaults:
       run:
