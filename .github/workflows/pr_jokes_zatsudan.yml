@@ -46,7 +46,7 @@ jobs:
       run: terraform validate -no-color
 
     - id: plan
-      run: terraform plan -no-color -detailed-exitcode -compact-warnings
+      run: terraform plan -no-color -detailed-exitcode -compact-warnings -input=false
       continue-on-error: true
 
     - uses: actions/github-script@v4
