@@ -9,6 +9,7 @@ on:
     - ".github/workflows/pr_jokes_zatsudan.yml"
     - "jokes/zatsudan/*.tf"
     - "jokes/zatsudan2/*.tf"
+    - "jokes/rps/*.tf"
     type:
     - opened
     - synchronize
@@ -24,6 +25,7 @@ jobs:
         dir:
         - "jokes/zatsudan"
         - "jokes/zatsudan2"
+        - "jokes/rps"
 
     defaults:
       run:
