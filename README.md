@@ -12,6 +12,10 @@ This is a challenge to be updated weekly.
 
 # directories or contents
 
+## examples
+
+Example that can be reused for business.
+
 ## functions
 
 Example of using terraform functions.
