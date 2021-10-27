@@ -18,3 +18,10 @@ output "result" {
   value = local.multiple_instances
 }
 
+output "result_length" {
+  value = length(local.multiple_instances)
+}
+
+output "result_keys" {
+  value = keys(local.multiple_instances)
+}
