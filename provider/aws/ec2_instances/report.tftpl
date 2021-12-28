@@ -1,0 +1,4 @@
+"instance_id","Name"
+%{ for i in instances ~}
+"${i.instance_id}","${i.tags.Name}","${i.private_ip}"
+%{ endfor ~}
