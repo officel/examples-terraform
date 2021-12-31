@@ -8,91 +8,30 @@ on:
     paths:
     - ".github/workflows/pr_functions.yml"
     - "functions/*.tf"
-    type:
-    - opened
-    - synchronize
-    - rerequested
 
 jobs:
   on-pull-request:
     name: terraform
     runs-on: ubuntu-latest
 
+    # 問題発生時に使用時間を無駄に使わないように
+    timeout-minutes: 10
+    # composite 内の run に continue-on-error が付けられないので外で
+    continue-on-error: true
     strategy:
+      # matrix のジョブのどれかがエラーになっても他のジョブをキャンセルしない（false）
+      fail-fast: false
       matrix:
         dir:
         - "functions"
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.dir }}
-    
     steps:
     - uses: actions/checkout@master
 
-    - uses: hashicorp/setup-terraform@v1
-
-    - id: fmt
-      run: terraform fmt -check -diff
-
-    - id: init
-      run: terraform init -no-color
-
-    - id: validate
-      run: terraform validate -no-color
-
-    - id: plan
-      run: terraform plan -no-color -detailed-exitcode -compact-warnings
-      continue-on-error: true
-
-    - uses: actions/github-script@v4
-      if: always()
-      env:
-        FMT:      "${{ steps.fmt.outputs.stderr      }}\n${{ steps.fmt.outputs.stdout }}"
-        INIT:     "${{ steps.init.outputs.stderr     }}\n${{ steps.init.outputs.stdout }}"
-        VALIDATE: "${{ steps.validate.outputs.stderr }}\n${{ steps.validate.outputs.stdout }}"
-        PLAN:     "${{ steps.plan.outputs.stderr     }}\n${{ steps.plan.outputs.stdout }}"
+    - uses: ./.github/actions/terraform
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const icon_result_fmt      = "${{ steps.fmt.outcome      }}".toString().startsWith("success")  ? ":blue_heart:" : ":broken_heart:";
-          const icon_result_init     = "${{ steps.init.outcome     }}".toString().startsWith("success")  ? ":blue_heart:" : ":broken_heart:";
-          const icon_result_validate = "${{ steps.validate.outcome }}".toString().startsWith("success")  ? ":blue_heart:" : ":broken_heart:";
-          const icon_result_plan     = "${{ steps.plan.outcome     }}".toString().startsWith("success")  ? ":blue_heart:" : ":broken_heart:";
-
-          const output = `terraform \`fmt\`: ${ icon_result_fmt }, \`init\`: ${ icon_result_init }, \`validate\`: ${ icon_result_validate }, \`plan\`: ${ icon_result_plan }
-
-          <details><summary>Show Results fmt, init, validate</summary>
-
-          \`\`\`
-          $ terraform fmt -check -diff
-          ${process.env.FMT}
-          $ terraform init -no-color
-          ${process.env.INIT}
-          $ terraform validate -no-color
-          ${process.env.VALIDATE}
-          \`\`\`
-
-          </details>
-
-          <details><summary>Show Results plan ${{ matrix.dir }}</summary>
-
-          \`\`\`
-          $ terraform plan -no-color -detailed-exitcode
-          ${process.env.PLAN}
-          \`\`\`
-
-          </details>
-
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*
-          `;
-
-          if (!context.issue.number) { return }
-
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
+        terraform_version: 1.1.x
+        secrets_github_token: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ${{ matrix.dir }}
+      if: always()
 

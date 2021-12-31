@@ -1,0 +1,99 @@
+name: "setup-terraform"
+description: 'terraform ci. fmt,init,validate,plan. not in apply'
+
+inputs:
+  terraform_version:
+    description: 'use terraform version'
+    required: false
+    default: 1.1.x
+  secrets_github_token:
+    description: 'secrets.GITHUB_TOKEN'
+    required: true
+    default: ""
+  working-directory:
+    description: 'matrix.dir'
+    required: true
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+
+    - uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+
+    - id: fmt
+      run: terraform fmt -check -diff
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - id: init
+      run: terraform init -no-color
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - id: validate
+      run: terraform validate -no-color
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - id: plan
+      run: terraform plan -no-color -detailed-exitcode
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - uses: actions/github-script@v5
+      if: always()
+      # run に shell を強要されることで setup-terraform の exitcode が出力されないっぽい？
+      # outcome の中身がでない？
+      # shell をかますことで terraform 処理のすべてがラッピングされてしまうので、exitcode も outputs 経由で取得する必要があるっぽい
+      env:
+        FMT:      "${{ steps.fmt.outputs.stderr      }}\n${{ steps.fmt.outputs.stdout }}"
+        INIT:     "${{ steps.init.outputs.stderr     }}\n${{ steps.init.outputs.stdout }}"
+        VALIDATE: "${{ steps.validate.outputs.stderr }}\n${{ steps.validate.outputs.stdout }}"
+        PLAN:     "${{ steps.plan.outputs.stderr     }}\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ inputs.secrets_github_token }}
+        script: |
+          const icon_result_fmt      = "${{ steps.fmt.outputs.exitcode      }}".toString().startsWith("0")  ? ":blue_heart:" : ":broken_heart:";
+          const icon_result_init     = "${{ steps.init.outputs.exitcode     }}".toString().startsWith("0")  ? ":blue_heart:" : ":broken_heart:";
+          const icon_result_validate = "${{ steps.validate.outputs.exitcode }}".toString().startsWith("0")  ? ":blue_heart:" : ":broken_heart:";
+          const icon_result_plan     = "${{ steps.plan.outputs.exitcode     }}".toString().startsWith("0")  ? ":blue_heart:" : ":broken_heart:";
+          const output = `terraform \`fmt\`: ${ icon_result_fmt }, \`init\`: ${ icon_result_init }, \`validate\`: ${ icon_result_validate }, \`plan\`: ${ icon_result_plan }
+
+          <details><summary>Show Results fmt, init, validate</summary>
+
+          \`\`\`
+          $ terraform fmt -check -diff
+          ${process.env.FMT}
+          $ terraform init -no-color
+          ${process.env.INIT}
+          $ terraform validate -no-color
+          ${process.env.VALIDATE}
+          \`\`\`
+
+          </details>
+
+          <details><summary>Show Results plan ${{ matrix.dir }}</summary>
+
+          \`\`\`
+          $ terraform plan -no-color -detailed-exitcode
+          ${process.env.PLAN}
+          \`\`\`
+
+          </details>
+
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*
+          `;
+
+          if (!context.issue.number) { return }
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
+
+
