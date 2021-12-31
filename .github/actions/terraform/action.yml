@@ -5,7 +5,7 @@ inputs:
   terraform_version:
     description: 'use terraform version'
     required: false
-    default: 0.15.x
+    default: 1.1.x
   secrets_github_token:
     description: 'secrets.GITHUB_TOKEN'
     required: true
@@ -14,8 +14,6 @@ inputs:
     description: 'matrix.dir'
     required: true
     default: ""
-
-
 
 runs:
   using: "composite"
@@ -46,8 +44,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - uses: actions/github-script@v5
-      # if: always()
-      # composite では if が使えないらしい
+      if: always()
       # run に shell を強要されることで setup-terraform の exitcode が出力されないっぽい？
       # outcome の中身がでない？
       # shell をかますことで terraform 処理のすべてがラッピングされてしまうので、exitcode も outputs 経由で取得する必要があるっぽい
