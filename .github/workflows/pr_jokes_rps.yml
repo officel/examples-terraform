@@ -1,4 +1,4 @@
-name: pr_jokes_zatsudan
+name: pr_jokes_rps
 
 on:
   workflow_dispatch:
@@ -6,9 +6,12 @@ on:
     - cron: '0 0 * * MON'
   pull_request:
     paths:
-    - ".github/workflows/pr_jokes_zatsudan.yml"
-    - "jokes/zatsudan/*.tf"
-    - "jokes/zatsudan2/*.tf"
+    - ".github/workflows/pr_jokes_rps.yml"
+    - "jokes/rps/*.tf"
+
+env:
+  # 入力値あったの忘れてた
+  TF_VAR_you: 1
 
 jobs:
   on-pull-request:
@@ -24,8 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         dir:
-        - "jokes/zatsudan"
-        - "jokes/zatsudan2"
+        - "jokes/rps"
 
     steps:
     - uses: actions/checkout@master
